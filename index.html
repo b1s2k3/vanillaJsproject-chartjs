@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Equilibrium Dollar/Euro Exchange Rate</title>
+  </head>
+  <body>
+    <header>Determination of the Equilibrium Dollar/Euro Exchange Rate</header>
+    <div class="input-container">
+      <label>Dollar Interest Rate</label>
+      <input id="dolInt" type="number" />
+      <label>Euro Interest Rate</label>
+      <input id="euInt" type="number" />
+      <label>Expected Exchange Rate($/€)</label>
+      <input id="expcEx" type="number" />
+      <button id="btn-submit">Submit</button>
+    </div>
+    <div id="exp-cont">
+      <div id="chartContainer" style="height: 300px; width: 100%"></div>
+    </div>
+    <h3 id="equ-val"></h3>
+    <script>
+      var dollarIntR = document.getElementById("dolInt");
+      var euroIntR = document.getElementById("euInt");
+      var expectedExR = document.getElementById("expcEx");
+      var equValue = document.getElementById("equ-val");
+
+      var btnOk = document.getElementById("btn-submit");
+
+      // Getting input values
+
+      var submittedVal = [];
+
+      const sendInputs = () => {
+        submittedVal.push(dollarIntR.value);
+        submittedVal.push(euroIntR.value);
+        submittedVal.push(expectedExR.value);
+      };
+
+      // Rearranging format of inputs
+
+      var reArg = [];
+
+      const reArrangeInputs = () => {
+        sendInputs();
+        submittedVal.map((item) => {
+          let step1 = parseFloat(item);
+          let step2 = step1.toFixed(3);
+          let step3 = parseFloat(step2);
+          reArg.push(step3);
+        });
+        return calExchangeRate(reArg);
+      };
+
+      // Calculation of equilibrium exchange rate
+
+      const calExchangeRate = (arr) => {
+        let firstCal = arr[0] * 1000 - arr[1] * 1000 + 1000;
+        let result = (arr[2] * 1000) / firstCal;
+
+        let fixedRes = result.toFixed(3);
+        let toNum = parseFloat(fixedRes);
+        return toNum;
+      };
+
+      // Creating data set
+
+      var dataSets = [];
+      var equVal = 0;
+
+      const createDataSets = () => {
+        reArrangeInputs();
+        for (let i = 3; i < 15; i++) {
+          dataSets.push({ x: i, y: calExchangeRate([i, reArg[1], reArg[2]]) });
+          if (i === reArg[0]) {
+            res = calExchangeRate([i, reArg[1], reArg[2]]);
+            equVal += res;
+            equValue.innerHTML = equVal;
+            console.log(equVal);
+          }
+        }
+        console.log(dataSets);
+      };
+
+      // Chart plotting
+
+      function pp() {
+        createDataSets();
+        var chart = new CanvasJS.Chart("chartContainer", {
+          title: {
+            text: "Equilibrium Dollar/Euro Exchange Rate",
+          },
+          axisX: {
+            title: "Rates of Return in Dollar Term",
+            stripLines: [
+              {
+                value: reArg[0],
+                thickness: 4,
+              },
+            ],
+            valueFormatString: "####",
+          },
+          axisY: {
+            title: "Exhange Rate",
+          },
+          data: [
+            {
+              type: "spline",
+              dataPoints: dataSets,
+            },
+          ],
+        });
+        chart.render();
+      }
+
+      btnOk.addEventListener("click", pp);
+    </script>
+    <script
+      type="text/javascript"
+      src="https://canvasjs.com/assets/script/canvasjs.min.js"
+    ></script>
+  </body>
+</html>
